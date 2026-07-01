@@ -2,8 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import { Play, X, Lock, Star, ChevronLeft, ChevronRight, Settings, Film, Clock, Calendar, Trash2 } from "lucide-react";
 import { supabase } from "./supabaseClient";
 
-const FONT_DISPLAY = "'Bebas Neue', 'Oswald', sans-serif";
-const FONT_BODY = "'Inter', -apple-system, sans-serif";
+const FONT_DISPLAY = "'Cinzel', 'Georgia', serif";
+const FONT_BODY = "'Work Sans', -apple-system, sans-serif";
 
 const COLORS = {
   bg: "#0B0B0D",
@@ -109,7 +109,7 @@ function PosterCard({ film, onClick }) {
           <div style={{ position: "absolute", top: 8, left: 8, background: COLORS.gold, color: "#1a1a1a", fontSize: 9, fontWeight: 700, padding: "2px 6px", borderRadius: 3, letterSpacing: 0.5 }}>FEATURED</div>
         )}
         <div style={{ position: "absolute", bottom: 8, left: 10, right: 10 }}>
-          <div style={{ fontFamily: FONT_DISPLAY, fontSize: 18, color: COLORS.text, letterSpacing: 0.5, lineHeight: 1 }}>{film.title}</div>
+          <div style={{ fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 15, color: COLORS.text, letterSpacing: 0.3, lineHeight: 1.2 }}>{film.title}</div>
         </div>
       </div>
       <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6, fontSize: 11, color: COLORS.textMuted, fontFamily: FONT_BODY }}>
@@ -126,7 +126,7 @@ function Row({ title, films, onSelect }) {
 
   return (
     <div style={{ marginBottom: 36, position: "relative" }}>
-      <div style={{ fontFamily: FONT_DISPLAY, fontSize: 22, letterSpacing: 1, color: COLORS.text, marginBottom: 12, paddingLeft: 4, display: "flex", alignItems: "center", gap: 8 }}>
+      <div style={{ fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 19, letterSpacing: 0.5, color: COLORS.text, marginBottom: 12, paddingLeft: 4, display: "flex", alignItems: "center", gap: 8 }}>
         {title}
         <span style={{ fontFamily: FONT_BODY, fontSize: 11, color: COLORS.textMuted, fontWeight: 400 }}>{films.length} {films.length === 1 ? "film" : "films"}</span>
       </div>
@@ -149,7 +149,7 @@ function PasswordGate({ film, onUnlock }) {
   return (
     <div style={{ padding: "40px 24px", textAlign: "center" }}>
       <Lock size={32} color={COLORS.gold} style={{ marginBottom: 16 }} />
-      <div style={{ fontFamily: FONT_DISPLAY, fontSize: 24, color: COLORS.text, marginBottom: 6, letterSpacing: 1 }}>PRIVATE DELIVERY</div>
+      <div style={{ fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 21, color: COLORS.text, marginBottom: 6, letterSpacing: 0.5 }}>PRIVATE DELIVERY</div>
       <div style={{ fontFamily: FONT_BODY, fontSize: 13, color: COLORS.textMuted, marginBottom: 20 }}>Enter the password shared with you to view "{film.title}"</div>
       <input type="password" value={pw} onChange={(e) => { setPw(e.target.value); setError(false); }} onKeyDown={(e) => e.key === "Enter" && submit()}
         placeholder="Password" style={{ background: COLORS.bgCard, border: `1px solid ${error ? COLORS.accent : COLORS.border}`, borderRadius: 6, padding: "10px 14px", color: COLORS.text, fontFamily: FONT_BODY, fontSize: 14, width: 220, outline: "none", textAlign: "center" }} />
@@ -173,7 +173,7 @@ function DetailModal({ film, onClose }) {
               <iframe src={getEmbedUrl(film)} style={{ width: "100%", height: "100%", border: "none" }} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen title={film.title} />
             </div>
             <div style={{ padding: 26 }}>
-              <div style={{ fontFamily: FONT_DISPLAY, fontSize: 32, color: COLORS.text, letterSpacing: 0.5, lineHeight: 1.1 }}>{film.title}</div>
+              <div style={{ fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 26, color: COLORS.text, letterSpacing: 0.3, lineHeight: 1.2 }}>{film.title}</div>
               <div style={{ display: "flex", gap: 14, alignItems: "center", marginTop: 10, marginBottom: 16, fontFamily: FONT_BODY, fontSize: 12, color: COLORS.textMuted, flexWrap: "wrap" }}>
                 <span style={{ display: "flex", alignItems: "center", gap: 4 }}><Calendar size={12} />{film.year}</span>
                 <span style={{ display: "flex", alignItems: "center", gap: 4 }}><Clock size={12} />{film.duration}</span>
@@ -226,7 +226,7 @@ function AdminPanel({ films, addFilm, deleteFilm, onClose }) {
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }} onClick={onClose}>
       <div onClick={(e) => e.stopPropagation()} style={{ background: COLORS.bgCard, borderRadius: 10, maxWidth: 560, width: "100%", maxHeight: "88vh", overflowY: "auto", border: `1px solid ${COLORS.border}`, padding: 24 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
-          <div style={{ fontFamily: FONT_DISPLAY, fontSize: 24, color: COLORS.text, letterSpacing: 1 }}>STUDIO ADMIN</div>
+          <div style={{ fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 21, color: COLORS.text, letterSpacing: 0.5 }}>STUDIO ADMIN</div>
           <button onClick={onClose} style={{ background: "none", border: "none", color: COLORS.textMuted, cursor: "pointer" }}><X size={20} /></button>
         </div>
         <div style={{ display: "flex", gap: 8, marginBottom: 18 }}>
@@ -302,7 +302,7 @@ export default function App() {
   return (
     <div style={{ background: COLORS.bg, minHeight: "100vh", fontFamily: FONT_BODY, color: COLORS.text }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Work+Sans:wght@400;500;600;700&display=swap');
         * { box-sizing: border-box; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .poster-card:hover { transform: scale(1.06); z-index: 2; }
@@ -313,8 +313,8 @@ export default function App() {
 
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "18px 32px", position: "sticky", top: 0, zIndex: 50, background: "linear-gradient(180deg, rgba(11,11,13,0.95), rgba(11,11,13,0.7))", backdropFilter: "blur(8px)", borderBottom: `1px solid ${COLORS.border}` }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{ fontFamily: FONT_DISPLAY, fontSize: 24, color: COLORS.accent, letterSpacing: 1 }}>THE CANDID FILMS</div>
-          <div style={{ fontFamily: FONT_BODY, fontSize: 10, color: COLORS.textMuted, letterSpacing: 1, textTransform: "uppercase", marginTop: 2 }}>Studio</div>
+          <div style={{ fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 21, color: COLORS.accent, letterSpacing: 0.5 }}>THE CANDID FILMS</div>
+          <div style={{ fontFamily: FONT_BODY, fontSize: 10, color: COLORS.textMuted, letterSpacing: 1.5, textTransform: "uppercase", marginTop: 2 }}>Studio</div>
         </div>
         <button onClick={() => setShowAdmin(true)} style={{ background: "none", border: `1px solid ${COLORS.border}`, borderRadius: 6, padding: "7px 14px", color: COLORS.textMuted, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, fontFamily: FONT_BODY, fontSize: 12 }}><Settings size={14} /> Manage Library</button>
       </div>
@@ -336,7 +336,7 @@ export default function App() {
                   <span style={{ background: COLORS.gold, color: "#1a1a1a", fontSize: 10, fontWeight: 700, padding: "3px 8px", borderRadius: 3, letterSpacing: 0.5 }}>FEATURED</span>
                   <span style={{ fontSize: 11, color: COLORS.textMuted }}>{featured.category}</span>
                 </div>
-                <div style={{ fontFamily: FONT_DISPLAY, fontSize: 56, lineHeight: 0.95, color: COLORS.text, letterSpacing: 0.5, marginBottom: 12 }}>{featured.title}</div>
+                <div style={{ fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 42, lineHeight: 1.1, color: COLORS.text, letterSpacing: 0.3, marginBottom: 12 }}>{featured.title}</div>
                 <div style={{ fontSize: 14, color: COLORS.textMuted, lineHeight: 1.6, marginBottom: 18, maxWidth: 480 }}>{featured.synopsis}</div>
                 <button onClick={() => setSelectedFilm(featured)} style={{ background: COLORS.accent, color: "#fff", border: "none", borderRadius: 6, padding: "11px 24px", fontFamily: FONT_BODY, fontWeight: 700, fontSize: 14, cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}><Play size={16} fill="#fff" /> Watch Now</button>
               </div>
@@ -348,7 +348,7 @@ export default function App() {
             {films.length === 0 && (
               <div style={{ textAlign: "center", padding: "60px 0", color: COLORS.textMuted }}>
                 <Film size={32} style={{ marginBottom: 12, opacity: 0.4 }} />
-                <div style={{ fontFamily: FONT_DISPLAY, fontSize: 20, letterSpacing: 1 }}>YOUR LIBRARY IS EMPTY</div>
+                <div style={{ fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 18, letterSpacing: 0.5 }}>YOUR LIBRARY IS EMPTY</div>
                 <div style={{ fontSize: 13, marginTop: 6 }}>Click "Manage Library" to add your first film.</div>
               </div>
             )}
