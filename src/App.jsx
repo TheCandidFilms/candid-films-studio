@@ -16,6 +16,7 @@ const COLORS = {
 };
 
 const CATEGORIES = ["Released", "Coming Soon", "Trailers", "Wedding Films", "Corporate Films"];
+const ADMIN_PASSWORD = "unlockthis";
 
 function useFilms() {
   const [films, setFilms] = useState([]);
@@ -307,6 +308,32 @@ function DetailModal({ film, onClose }) {
   );
 }
 
+function AdminLogin({ onSuccess, onClose }) {
+  const [pw, setPw] = useState("");
+  const [error, setError] = useState(false);
+
+  const submit = () => (pw === ADMIN_PASSWORD ? onSuccess() : setError(true));
+
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }} onClick={onClose}>
+      <div onClick={(e) => e.stopPropagation()} style={{ background: COLORS.bgCard, borderRadius: 10, maxWidth: 360, width: "100%", border: `1px solid ${COLORS.border}`, padding: "36px 28px", textAlign: "center" }}>
+        <Lock size={28} color={COLORS.gold} style={{ marginBottom: 14 }} />
+        <div style={{ fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 20, color: COLORS.text, marginBottom: 6, letterSpacing: 0.5 }}>STUDIO ACCESS</div>
+        <div style={{ fontFamily: FONT_BODY, fontSize: 13, color: COLORS.textMuted, marginBottom: 20 }}>Enter the admin password to manage the library.</div>
+        <input
+          type="password" value={pw} autoFocus
+          onChange={(e) => { setPw(e.target.value); setError(false); }}
+          onKeyDown={(e) => e.key === "Enter" && submit()}
+          placeholder="Admin password"
+          style={{ background: COLORS.bg, border: `1px solid ${error ? COLORS.accent : COLORS.border}`, borderRadius: 6, padding: "10px 14px", color: COLORS.text, fontFamily: FONT_BODY, fontSize: 14, width: "100%", outline: "none", textAlign: "center", marginBottom: error ? 8 : 18 }}
+        />
+        {error && <div style={{ color: COLORS.accent, fontSize: 12, marginBottom: 14, fontFamily: FONT_BODY }}>Incorrect password.</div>}
+        <button onClick={submit} style={{ background: COLORS.accent, color: "#fff", border: "none", borderRadius: 6, padding: "10px 24px", fontFamily: FONT_BODY, fontWeight: 600, fontSize: 13, cursor: "pointer", width: "100%" }}>Unlock</button>
+      </div>
+    </div>
+  );
+}
+
 function AdminPanel({ films, addFilm, deleteFilm, onClose }) {
   const blank = { title: "", category: CATEGORIES[0], type: "Full Film", year: "2026", duration: "", rating: "All Ages", synopsis: "", cast: "", crewRole: "", crewName: "", videoId: "", platform: "youtube", featured: false, isPrivate: false, password: "", posterUrl: "" };
   const [form, setForm] = useState(blank);
@@ -415,7 +442,15 @@ export default function App() {
   const { films, loading, error, addFilm, deleteFilm } = useFilms();
   const [selectedFilm, setSelectedFilm] = useState(null);
   const [showAdmin, setShowAdmin] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [adminLinkPresent, setAdminLinkPresent] = useState(false);
   const featured = films.find((f) => f.featured) || films[0];
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setAdminLinkPresent(params.get("admin") === "1");
+  }, []);
 
   return (
     <div style={{ background: COLORS.bg, minHeight: "100vh", fontFamily: FONT_BODY, color: COLORS.text }}>
@@ -434,7 +469,9 @@ export default function App() {
           <div style={{ fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 21, color: COLORS.accent, letterSpacing: 0.5 }}>THE CANDID FILMS</div>
           <div style={{ fontFamily: FONT_BODY, fontSize: 10, color: COLORS.textMuted, letterSpacing: 1.5, textTransform: "uppercase", marginTop: 2 }}>Studio</div>
         </div>
-        <button onClick={() => setShowAdmin(true)} style={{ background: "none", border: `1px solid ${COLORS.border}`, borderRadius: 6, padding: "7px 14px", color: COLORS.textMuted, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, fontFamily: FONT_BODY, fontSize: 12 }}><Settings size={14} /> Manage Library</button>
+        {adminLinkPresent && (
+          <button onClick={() => (isAdmin ? setShowAdmin(true) : setShowLogin(true))} style={{ background: "none", border: `1px solid ${COLORS.border}`, borderRadius: 6, padding: "7px 14px", color: COLORS.textMuted, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, fontFamily: FONT_BODY, fontSize: 12 }}><Settings size={14} /> Manage Library</button>
+        )}
       </div>
 
       {error && (
@@ -463,7 +500,8 @@ export default function App() {
       )}
 
       {selectedFilm && <DetailModal film={selectedFilm} onClose={() => setSelectedFilm(null)} />}
-      {showAdmin && <AdminPanel films={films} addFilm={addFilm} deleteFilm={deleteFilm} onClose={() => setShowAdmin(false)} />}
+      {showLogin && <AdminLogin onSuccess={() => { setIsAdmin(true); setShowLogin(false); setShowAdmin(true); }} onClose={() => setShowLogin(false)} />}
+      {showAdmin && isAdmin && <AdminPanel films={films} addFilm={addFilm} deleteFilm={deleteFilm} onClose={() => setShowAdmin(false)} />}
     </div>
   );
 }
