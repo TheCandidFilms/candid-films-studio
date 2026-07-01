@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Play, X, Lock, Star, ChevronLeft, ChevronRight, Settings, Film, Clock, Calendar, Trash2 } from "lucide-react";
+import { Play, X, Lock, Star, ChevronLeft, ChevronRight, Settings, Film, Clock, Calendar, Trash2, Volume2, VolumeX } from "lucide-react";
 import { supabase } from "./supabaseClient";
 
 const FONT_DISPLAY = "'Cinzel', 'Georgia', serif";
@@ -89,28 +89,125 @@ function getEmbedUrl(film) {
   return `https://www.youtube.com/embed/${film.videoId}?rel=0`;
 }
 
-function PosterCard({ film, onClick }) {
+function getPreviewUrl(film, muted) {
+  if (film.platform === "vimeo") {
+    return `https://player.vimeo.com/video/${film.videoId}?autoplay=1&muted=${muted ? 1 : 0}&loop=1&background=0&controls=0&title=0&byline=0&portrait=0`;
+  }
+  return `https://www.youtube.com/embed/${film.videoId}?autoplay=1&mute=${muted ? 1 : 0}&loop=1&playlist=${film.videoId}&controls=0&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3`;
+}
+
+function HeroBanner({ featured, onWatch }) {
+  const [muted, setMuted] = useState(true);
+  if (!featured) return null;
+
   return (
-    <div onClick={onClick} className="poster-card" style={{ flex: "0 0 auto", width: 240, cursor: "pointer", position: "relative" }}>
+    <div style={{ position: "relative", height: 360, overflow: "hidden", marginBottom: 8 }}>
+      <iframe
+        key={featured.id}
+        src={getPreviewUrl(featured, muted)}
+        style={{ position: "absolute", inset: 0, width: "100%", height: "100%", border: "none", pointerEvents: "none" }}
+        allow="autoplay; encrypted-media"
+        title={featured.title}
+      />
+      <div style={{
+        position: "absolute", inset: 0,
+        background: `linear-gradient(180deg, rgba(11,11,13,0.25) 0%, ${COLORS.bg} 96%), linear-gradient(90deg, rgba(11,11,13,0.9) 0%, rgba(11,11,13,0.35) 55%, rgba(11,11,13,0.15) 100%)`,
+      }} />
+      <div style={{ position: "relative", zIndex: 2, height: "100%", display: "flex", alignItems: "flex-end", padding: "0 32px 32px" }}>
+        <div style={{ maxWidth: 560 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+            <span style={{ background: COLORS.gold, color: "#1a1a1a", fontSize: 10, fontWeight: 700, padding: "3px 8px", borderRadius: 3, letterSpacing: 0.5 }}>FEATURED</span>
+            <span style={{ fontSize: 11, color: COLORS.textMuted }}>{featured.category}</span>
+          </div>
+          <div style={{ fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 42, lineHeight: 1.1, color: COLORS.text, letterSpacing: 0.3, marginBottom: 12, textShadow: "0 2px 8px rgba(0,0,0,0.6)" }}>{featured.title}</div>
+          <div style={{ fontSize: 14, color: COLORS.textMuted, lineHeight: 1.6, marginBottom: 18, maxWidth: 480, textShadow: "0 1px 4px rgba(0,0,0,0.5)" }}>{featured.synopsis}</div>
+          <button onClick={onWatch} style={{ background: COLORS.accent, color: "#fff", border: "none", borderRadius: 6, padding: "11px 24px", fontFamily: FONT_BODY, fontWeight: 700, fontSize: 14, cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}>
+            <Play size={16} fill="#fff" /> Watch Now
+          </button>
+        </div>
+      </div>
+      <button
+        onClick={() => setMuted((m) => !m)}
+        style={{
+          position: "absolute", bottom: 32, right: 32, zIndex: 3,
+          background: "rgba(11,11,13,0.7)", border: `1px solid ${COLORS.border}`, borderRadius: 20,
+          padding: "8px 14px", display: "flex", alignItems: "center", gap: 6,
+          color: COLORS.text, cursor: "pointer", fontFamily: FONT_BODY, fontSize: 12, backdropFilter: "blur(4px)",
+        }}
+      >
+        {muted ? <VolumeX size={14} /> : <Volume2 size={14} />} {muted ? "Unmute" : "Mute"}
+      </button>
+    </div>
+  );
+}
+
+function PosterCard({ film, onClick }) {
+  const [showPreview, setShowPreview] = useState(false);
+  const [muted, setMuted] = useState(true);
+  const timerRef = useRef(null);
+
+  const handleEnter = () => {
+    timerRef.current = setTimeout(() => setShowPreview(true), 450);
+  };
+  const handleLeave = () => {
+    clearTimeout(timerRef.current);
+    setShowPreview(false);
+    setMuted(true);
+  };
+
+  return (
+    <div
+      onClick={onClick}
+      onMouseEnter={handleEnter}
+      onMouseLeave={handleLeave}
+      className="poster-card"
+      style={{ flex: "0 0 auto", width: 240, cursor: "pointer", position: "relative" }}
+    >
       <div style={{
         width: "100%", height: 135, borderRadius: 6,
         background: `linear-gradient(135deg, ${COLORS.bgCard}, #0d0d10)`,
         position: "relative", overflow: "hidden", border: `1px solid ${COLORS.border}`,
       }}>
-        <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.85) 100%)" }}>
-          <Film size={28} color={COLORS.textMuted} style={{ opacity: 0.4 }} />
-        </div>
+        {showPreview ? (
+          <iframe
+            src={getPreviewUrl(film, muted)}
+            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", border: "none", pointerEvents: "none" }}
+            allow="autoplay; encrypted-media"
+            title={film.title}
+          />
+        ) : (
+          <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.85) 100%)" }}>
+            <Film size={28} color={COLORS.textMuted} style={{ opacity: 0.4 }} />
+          </div>
+        )}
+        {!showPreview && (
+          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.6) 100%)", pointerEvents: "none" }} />
+        )}
         {film.isPrivate && (
-          <div style={{ position: "absolute", top: 8, right: 8, background: "rgba(0,0,0,0.7)", borderRadius: 4, padding: 4 }}>
+          <div style={{ position: "absolute", top: 8, right: 8, background: "rgba(0,0,0,0.7)", borderRadius: 4, padding: 4, zIndex: 2 }}>
             <Lock size={12} color={COLORS.gold} />
           </div>
         )}
         {film.featured && (
-          <div style={{ position: "absolute", top: 8, left: 8, background: COLORS.gold, color: "#1a1a1a", fontSize: 9, fontWeight: 700, padding: "2px 6px", borderRadius: 3, letterSpacing: 0.5 }}>FEATURED</div>
+          <div style={{ position: "absolute", top: 8, left: 8, background: COLORS.gold, color: "#1a1a1a", fontSize: 9, fontWeight: 700, padding: "2px 6px", borderRadius: 3, letterSpacing: 0.5, zIndex: 2 }}>FEATURED</div>
         )}
-        <div style={{ position: "absolute", bottom: 8, left: 10, right: 10 }}>
-          <div style={{ fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 15, color: COLORS.text, letterSpacing: 0.3, lineHeight: 1.2 }}>{film.title}</div>
+        <div style={{ position: "absolute", bottom: 8, left: 10, right: showPreview ? 34 : 10, zIndex: 2, pointerEvents: "none" }}>
+          <div style={{ fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 15, color: COLORS.text, letterSpacing: 0.3, lineHeight: 1.2, textShadow: "0 1px 4px rgba(0,0,0,0.8)" }}>{film.title}</div>
         </div>
+        {showPreview && (
+          <button
+            onClick={(e) => { e.stopPropagation(); setMuted((m) => !m); }}
+            style={{
+              position: "absolute", bottom: 8, right: 8, zIndex: 3, pointerEvents: "auto",
+              background: "rgba(0,0,0,0.7)", border: `1px solid ${COLORS.border}`, borderRadius: "50%",
+              width: 24, height: 24, display: "flex", alignItems: "center", justifyContent: "center",
+              cursor: "pointer", color: COLORS.text,
+            }}
+            title={muted ? "Unmute preview" : "Mute preview"}
+          >
+            {muted ? <VolumeX size={12} /> : <Volume2 size={12} />}
+          </button>
+        )}
       </div>
       <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6, fontSize: 11, color: COLORS.textMuted, fontFamily: FONT_BODY }}>
         <span>{film.type}</span><span>{film.year}</span>
@@ -329,19 +426,7 @@ export default function App() {
         <div style={{ padding: 60, textAlign: "center", color: COLORS.textMuted }}>Loading library…</div>
       ) : (
         <>
-          {featured && (
-            <div style={{ position: "relative", height: 360, display: "flex", alignItems: "flex-end", background: `linear-gradient(180deg, rgba(11,11,13,0.2) 0%, ${COLORS.bg} 95%), linear-gradient(135deg, #1a1015, #0B0B0D)`, padding: "0 32px 32px", marginBottom: 8 }}>
-              <div style={{ maxWidth: 560 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-                  <span style={{ background: COLORS.gold, color: "#1a1a1a", fontSize: 10, fontWeight: 700, padding: "3px 8px", borderRadius: 3, letterSpacing: 0.5 }}>FEATURED</span>
-                  <span style={{ fontSize: 11, color: COLORS.textMuted }}>{featured.category}</span>
-                </div>
-                <div style={{ fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 42, lineHeight: 1.1, color: COLORS.text, letterSpacing: 0.3, marginBottom: 12 }}>{featured.title}</div>
-                <div style={{ fontSize: 14, color: COLORS.textMuted, lineHeight: 1.6, marginBottom: 18, maxWidth: 480 }}>{featured.synopsis}</div>
-                <button onClick={() => setSelectedFilm(featured)} style={{ background: COLORS.accent, color: "#fff", border: "none", borderRadius: 6, padding: "11px 24px", fontFamily: FONT_BODY, fontWeight: 700, fontSize: 14, cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}><Play size={16} fill="#fff" /> Watch Now</button>
-              </div>
-            </div>
-          )}
+          {featured && <HeroBanner featured={featured} onWatch={() => setSelectedFilm(featured)} />}
           <div className="sprocket" />
           <div style={{ padding: "28px 32px 60px" }}>
             {CATEGORIES.map((cat) => <Row key={cat} title={cat} films={films.filter((f) => f.category === cat)} onSelect={setSelectedFilm} />)}
