@@ -34,6 +34,7 @@ function useFilms() {
         crew: f.crew || [],
         isPrivate: f.is_private,
         videoId: f.video_id,
+        posterUrl: f.poster_url,
       }));
       setFilms(mapped);
     }
@@ -61,6 +62,7 @@ function useFilms() {
       featured: film.featured,
       is_private: film.isPrivate,
       password: film.password,
+      poster_url: film.posterUrl || null,
     }]);
     if (error) {
       setError(error.message);
@@ -174,6 +176,13 @@ function PosterCard({ film, onClick }) {
             style={{ position: "absolute", inset: 0, width: "100%", height: "100%", border: "none", pointerEvents: "none" }}
             allow="autoplay; encrypted-media"
             title={film.title}
+          />
+        ) : film.posterUrl ? (
+          <img
+            src={film.posterUrl}
+            alt={film.title}
+            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+            onError={(e) => { e.target.style.display = "none"; }}
           />
         ) : (
           <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.85) 100%)" }}>
@@ -299,7 +308,7 @@ function DetailModal({ film, onClose }) {
 }
 
 function AdminPanel({ films, addFilm, deleteFilm, onClose }) {
-  const blank = { title: "", category: CATEGORIES[0], type: "Full Film", year: "2026", duration: "", rating: "All Ages", synopsis: "", cast: "", crewRole: "", crewName: "", videoId: "", platform: "youtube", featured: false, isPrivate: false, password: "" };
+  const blank = { title: "", category: CATEGORIES[0], type: "Full Film", year: "2026", duration: "", rating: "All Ages", synopsis: "", cast: "", crewRole: "", crewName: "", videoId: "", platform: "youtube", featured: false, isPrivate: false, password: "", posterUrl: "" };
   const [form, setForm] = useState(blank);
   const [tab, setTab] = useState("add");
   const [saving, setSaving] = useState(false);
@@ -335,6 +344,18 @@ function AdminPanel({ films, addFilm, deleteFilm, onClose }) {
           <>
             <label style={labelStyle}>Title *</label>
             <input style={inputStyle} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="e.g. Sharma Wedding — Goa" />
+            <label style={labelStyle}>Poster Image URL</label>
+            <input style={inputStyle} value={form.posterUrl} onChange={(e) => setForm({ ...form, posterUrl: e.target.value })} placeholder="https://... (paste an image link)" />
+            {form.posterUrl && (
+              <div style={{ marginBottom: 12, marginTop: -6 }}>
+                <img
+                  src={form.posterUrl}
+                  alt="Poster preview"
+                  style={{ width: 120, height: 68, objectFit: "cover", borderRadius: 4, border: `1px solid ${COLORS.border}` }}
+                  onError={(e) => { e.target.style.opacity = 0.2; }}
+                />
+              </div>
+            )}
             <div style={{ display: "flex", gap: 10 }}>
               <div style={{ flex: 1 }}><label style={labelStyle}>Category</label>
                 <select style={inputStyle} value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>{CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}</select>
